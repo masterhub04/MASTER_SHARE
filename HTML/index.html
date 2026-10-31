@@ -103,10 +103,20 @@
       </section>
 
       <section id="voice-view" class="hidden flex-1 min-h-0 p-5 items-center justify-center relative overflow-hidden">
-        <div class="w-full h-full rounded-2xl bg-[#080809] border border-gray-800/60 flex flex-col items-center justify-center text-center px-6">
-          <div class="w-16 h-16 rounded-2xl bg-gray-900 border border-gray-800 flex items-center justify-center mb-4"><i class="fa-solid fa-volume-high text-2xl text-gray-500"></i></div>
-          <h3 id="voice-stage-title" class="text-base font-semibold text-gray-300">Conectado ao canal</h3>
-          <p id="voice-stage-description" class="mt-2 text-sm text-gray-500 max-w-md">A conexão de voz entre computadores será implementada na próxima etapa.</p>
+        <div class="w-full h-full rounded-2xl bg-[#080809] border border-gray-800/60 flex flex-col items-center justify-center text-center px-6 overflow-hidden">
+          <div id="voice-placeholder" class="flex flex-col items-center justify-center">
+            <div class="w-16 h-16 rounded-2xl bg-gray-900 border border-gray-800 flex items-center justify-center mb-4"><i class="fa-solid fa-volume-high text-2xl text-gray-500"></i></div>
+            <h3 id="voice-stage-title" class="text-base font-semibold text-gray-300">Conectado ao canal</h3>
+            <p id="voice-stage-description" class="mt-2 text-sm text-gray-500 max-w-md">Compartilhe sua tela para visualizar a captura nesta janela.</p>
+          </div>
+          <div id="screen-share-stage" class="hidden w-full h-full min-h-0 flex-col items-center justify-center gap-3 py-3">
+            <div class="w-full flex items-center justify-between px-2">
+              <div class="flex items-center gap-2 text-sm font-semibold text-gray-200"><span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> Sua tela está sendo compartilhada</div>
+              <button id="stop-screen-share" type="button" class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs font-semibold transition"><i class="fa-solid fa-stop mr-1"></i> Parar transmissão</button>
+            </div>
+            <video id="screen-share-video" autoplay playsinline muted class="w-full flex-1 min-h-0 object-contain rounded-xl bg-black border border-gray-800"></video>
+            <p id="screen-share-info" class="text-[11px] text-gray-500">Pré-visualização local • ainda não está sendo enviada aos outros participantes</p>
+          </div>
         </div>
       </section>
 
@@ -114,7 +124,7 @@
         <button class="w-11 h-11 rounded-xl bg-gray-800/80 text-gray-500 flex items-center justify-center" title="Microfone (em breve)" disabled><i class="fa-solid fa-microphone text-sm"></i></button>
         <button class="w-11 h-11 rounded-xl bg-gray-800/80 text-gray-500 flex items-center justify-center" title="Câmera (em breve)" disabled><i class="fa-solid fa-video text-sm"></i></button>
         <button id="leave-channel" class="w-12 h-11 rounded-xl bg-red-600 hover:bg-red-500 text-white flex items-center justify-center transition" title="Sair do canal"><i class="fa-solid fa-phone-slash text-sm"></i></button>
-        <button class="w-11 h-11 rounded-xl bg-gray-800/80 text-gray-500 flex items-center justify-center" title="Compartilhar tela (próxima etapa)" disabled><i class="fa-solid fa-desktop text-sm"></i></button>
+        <button id="start-screen-share" class="w-11 h-11 rounded-xl bg-gray-800/80 hover:bg-blue-600 text-gray-200 hover:text-white flex items-center justify-center transition" title="Compartilhar tela"><i class="fa-solid fa-desktop text-sm"></i></button>
         <button class="w-11 h-11 rounded-xl bg-gray-800/80 text-gray-500 flex items-center justify-center" title="Mais opções (em breve)" disabled><i class="fa-solid fa-ellipsis text-sm"></i></button>
       </div>
     </main>
@@ -134,6 +144,12 @@
       const voiceControls = document.getElementById('voice-controls');
       const joinButton = document.getElementById('join-channel');
       const leaveButton = document.getElementById('leave-channel');
+      const startShareButton = document.getElementById('start-screen-share');
+      const stopShareButton = document.getElementById('stop-screen-share');
+      const shareStage = document.getElementById('screen-share-stage');
+      const shareVideo = document.getElementById('screen-share-video');
+      const voicePlaceholder = document.getElementById('voice-placeholder');
+      let screenStream = null;
       const title = document.getElementById('active-channel-title');
       const subtitle = document.getElementById('channel-subtitle');
       const headerIcon = document.getElementById('header-icon');
@@ -215,7 +231,48 @@
         connectedVoice = selectedVoice;
         render();
       });
-      leaveButton.addEventListener('click', () => {
+      async function stopScreenShare() {
+        if (screenStream) {
+          screenStream.getTracks().forEach(track => track.stop());
+          screenStream = null;
+        }
+        shareVideo.srcObject = null;
+        shareStage.classList.add('hidden');
+        shareStage.classList.remove('flex');
+        voicePlaceholder.classList.remove('hidden');
+        startShareButton.classList.remove('hidden');
+      }
+
+      async function startScreenShare() {
+        if (!connectedVoice || !navigator.mediaDevices?.getDisplayMedia) {
+          alert('O compartilhamento de tela não está disponível neste ambiente.');
+          return;
+        }
+        try {
+          const stream = await navigator.mediaDevices.getDisplayMedia({
+            video: { frameRate: { ideal: 30, max: 60 } },
+            audio: false
+          });
+          screenStream = stream;
+          shareVideo.srcObject = stream;
+          voicePlaceholder.classList.add('hidden');
+          shareStage.classList.remove('hidden');
+          shareStage.classList.add('flex');
+          startShareButton.classList.add('hidden');
+          const [videoTrack] = stream.getVideoTracks();
+          if (videoTrack) videoTrack.addEventListener('ended', stopScreenShare, { once: true });
+        } catch (error) {
+          if (error.name !== 'NotAllowedError') {
+            alert('Não foi possível iniciar o compartilhamento de tela: ' + error.message);
+          }
+        }
+      }
+
+      startShareButton.addEventListener('click', startScreenShare);
+      stopShareButton.addEventListener('click', stopScreenShare);
+
+      leaveButton.addEventListener('click', async () => {
+        await stopScreenShare();
         connectedVoice = null;
         selectedVoice = null;
         currentText = 'geral';
