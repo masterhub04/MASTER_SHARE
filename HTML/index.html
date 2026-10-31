@@ -80,7 +80,7 @@
           <span class="text-gray-600">|</span>
           <span id="channel-subtitle" class="text-xs text-gray-500">Canal de texto</span>
         </div>
-        <button id="join-channel" type="button" class="hidden px-4 py-2 rounded-lg bg-accentBlue hover:bg-accentHover text-white text-xs font-semibold transition">Conectar ao canal</button>
+        <div class="flex items-center gap-2"><button id="check-updates" type="button" class="px-3 py-2 rounded-lg border border-gray-700 hover:border-blue-500/60 hover:bg-white/[0.04] text-gray-300 hover:text-white text-xs font-semibold transition" title="Verificar se existe uma versão nova"><i class="fa-solid fa-arrows-rotate mr-1.5"></i>Atualizações</button><button id="join-channel" type="button" class="hidden px-4 py-2 rounded-lg bg-accentBlue hover:bg-accentHover text-white text-xs font-semibold transition">Conectar ao canal</button></div>
       </div>
 
       <section id="chat-view" class="flex-1 min-h-0 flex flex-col">
@@ -136,6 +136,7 @@
         if (window.chrome && window.chrome.webview) window.chrome.webview.postMessage({ action, ...data });
       };
       document.querySelectorAll('[data-window]').forEach(button => button.addEventListener('click', () => send('window', { command: button.dataset.window })));
+      document.getElementById('check-updates').addEventListener('click', () => send('updates', { command: 'check' }));
 
       const textButtons = [...document.querySelectorAll('[data-text-channel]')];
       const voiceButtons = [...document.querySelectorAll('[data-voice-channel]')];
