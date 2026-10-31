@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Share</title>
+    <!-- Tailwind CSS CDN para testes rápidos -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkSidebar: '#121214',
+                        darkMain: '#0b0b0d',
+                        darkPanel: '#18181b',
+                        accentBlue: '#2b55ff',
+                        accentHover: '#1f3ec9'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome para ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-darkMain text-gray-100 font-sans h-screen flex flex-col overflow-hidden select-none">
+
+    <!-- Barra de Título Superior (Janela Desktop) -->
+    <div class="h-9 bg-[#0e0e10] flex items-center justify-between px-4 border-b border-gray-800/60 text-xs">
+        <div class="flex items-center space-x-2">
+            <div class="w-5 h-5 bg-gradient-to-tr from-blue-600 to-cyan-400 rounded flex items-center justify-center text-white font-bold text-[10px] shadow-sm shadow-blue-500/50">M</div>
+            <span class="font-semibold text-gray-200 tracking-wide">MASTER SHARE</span>
+        </div>
+        <!-- Botões de Controle da Janela do Windows -->
+        <div class="flex items-center space-x-4 text-gray-400">
+            <button class="hover:text-white transition"><i class="fa-solid fa-minus text-[10px]"></i></button>
+            <button class="hover:text-white transition"><i class="fa-regular fa-square text-[10px]"></i></button>
+            <button class="hover:text-red-400 transition"><i class="fa-solid fa-xmark text-sm"></i></button>
+        </div>
+    </div>
+
+    <!-- Container Principal da Aplicação -->
+    <div class="flex flex-1 overflow-hidden">
+
+        <!-- Painel Lateral Esquerdo (Sidebar) -->
+        <aside class="w-64 bg-darkSidebar flex flex-col border-r border-gray-800/40">
+            
+            <!-- Seletor de Servidor -->
+            <div class="p-3 border-b border-gray-800/40 flex items-center justify-between cursor-pointer hover:bg-white/[0.02] transition">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20">
+                        <i class="fa-solid fa-bolt text-white text-sm"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-sm font-bold text-gray-100 leading-tight">Game Confidencial</h2>
+                        <div class="flex items-center space-x-1.5 mt-0.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span class="text-[11px] text-gray-400">3 membros online</span>
+                        </div>
+                    </div>
+                </div>
+                <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
+            </div>
+
+            <!-- Canais de Transmissão -->
+            <div class="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+                <div>
+                    <div class="px-2 mb-2 text-[11px] font-bold uppercase tracking-wider text-gray-400 flex items-center justify-between">
+                        <span>Canais de Transmissão</span>
+                    </div>
+                    <div class="space-y-1">
+                        <!-- Canal Ativo -->
+                        <div class="flex items-center justify-between px-3 py-2 rounded-lg bg-accentBlue text-white font-medium text-sm shadow-lg shadow-blue-600/20">
+                            <div class="flex items-center space-x-2.5">
+                                <i class="fa-solid fa-volume-high text-sm"></i>
+                                <span>Geral</span>
+                            </div>
+                            <span class="text-xs bg-black/20 px-2 py-0.5 rounded-full font-semibold">2 / 5</span>
+                        </div>
+                        <!-- Canal Inativo 1 -->
+                        <div class="flex items-center justify-between px-3 py-2 rounded-lg text-gray-400 hover:bg-white/[0.04] hover:text-gray-200 transition text-sm cursor-pointer">
+                            <div class="flex items-center space-x-2.5">
+                                <i class="fa-solid fa-volume-high text-sm"></i>
+                                <span>Jogos</span>
+                            </div>
+                            <span class="text-xs text-gray-500">0 / 5</span>
+                        </div>
+                        <!-- Canal Privado -->
+                        <div class="flex items-center justify-between px-3 py-2 rounded-lg text-gray-400 hover:bg-white/[0.04] hover:text-gray-200 transition text-sm cursor-pointer">
+                            <div class="flex items-center space-x-2.5">
+                                <i class="fa-solid fa-lock text-xs"></i>
+                                <span>Privado</span>
+                            </div>
+                            <span class="text-xs text-gray-500">0 / 5</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lista de Usuários -->
+                <div>
+                    <div class="px-2 mb-2 text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                        Usuários
+                    </div>
+                    <div class="space-y-1">
+                        <!-- Usuário Transmitindo -->
+                        <div class="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-white/[0.03] transition cursor-pointer">
+                            <div class="flex items-center space-x-2.5">
+                                <div class="relative">
+                                    <div class="w-8 h-8 rounded-full bg-cover bg-center border border-blue-500/40" style="background-image: url('https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=100&q=80')"></div>
+                                    <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-darkSidebar rounded-full"></span>
+                                </div>
+                                <div class="flex items-center space-x-1.5">
+                                    <span class="text-sm font-medium text-gray-200">JamesMaster</span>
+                                    <i class="fa-solid fa-crown text-amber-400 text-[10px]"></i>
+                                </div>
+                            </div>
+                            <span class="bg-red-500/10 border border-red-500/30 text-red-400 text-[10px] font-bold px-1.5 py-0.5 rounded tracking-wide uppercase">Transmitindo</span>
+                        </div>
+
+                        <!-- Outros usuários -->
+                        <div class="flex items-center space-x-2.5 px-2 py-1.5 rounded-lg hover:bg-white/[0.03] transition cursor-pointer">
+                            <div class="relative">
+                                <div class="w-8 h-8 rounded-full bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80')"></div>
+                                <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-darkSidebar rounded-full"></span>
+                            </div>
+                            <span class="text-sm text-gray-300 font-medium">Mikael</span>
+                        </div>
+
+                        <div class="flex items-center space-x-2.5 px-2 py-1.5 rounded-lg hover:bg-white/[0.03] transition cursor-pointer">
+                            <div class="relative">
+                                <div class="w-8 h-8 rounded-full bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=100&q=80')"></div>
+                                <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-gray-500 border-2 border-darkSidebar rounded-full"></span>
+                            </div>
+                            <span class="text-sm text-gray-400 font-medium">LucasBR</span>
+                        </div>
+
+                        <div class="flex items-center space-x-2.5 px-2 py-1.5 rounded-lg hover:bg-white/[0.03] transition cursor-pointer">
+                            <div class="relative">
+                                <div class="w-8 h-8 rounded-full bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80')"></div>
+                                <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-darkSidebar rounded-full"></span>
+                            </div>
+                            <span class="text-sm text-gray-300 font-medium">ThaisGamer</span>
+                        </div>
+
+                        <div class="flex items-center space-x-2.5 px-2 py-1.5 rounded-lg hover:bg-white/[0.03] transition cursor-pointer">
+                            <div class="relative">
+                                <div class="w-8 h-8 rounded-full bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=100&q=80')"></div>
+                                <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-gray-500 border-2 border-darkSidebar rounded-full"></span>
+                            </div>
+                            <span class="text-sm text-gray-400 font-medium">RenatoFPS</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rodapé da Sidebar (Status de Conexão) -->
+            <div class="p-3 bg-[#0d0d0f] border-t border-gray-800/40 flex items-center justify-between">
+                <div class="flex items-center space-x-2.5">
+                    <div class="flex items-center space-x-1">
+                        <span class="w-1.5 h-3 bg-emerald-500 rounded-sm"></span>
+                        <span class="w-1.5 h-4 bg-emerald-500 rounded-sm"></span>
+                        <span class="w-1.5 h-5 bg-emerald-500 rounded-sm"></span>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-emerald-400">Conectado</p>
+                        <p class="text-[10px] text-gray-400 truncate w-32">Geral • Game Confidencial</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2 text-gray-400">
+                    <button class="w-7 h-7 rounded-lg hover:bg-white/5 hover:text-white transition flex items-center justify-center"><i class="fa-solid fa-headphones text-xs"></i></button>
+                    <button class="w-7 h-7 rounded-lg hover:bg-white/5 hover:text-white transition flex items-center justify-center"><i class="fa-solid fa-gear text-xs"></i></button>
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- Área Principal de Conteúdo -->
+        <main class="flex-1 flex flex-col bg-darkMain relative">
+            
+            <!-- Barra Superior do Canal -->
+            <div class="h-12 border-b border-gray-800/40 px-6 flex items-center justify-between bg-darkMain/50 backdrop-blur">
+                <div class="flex items-center space-x-3">
+                    <i class="fa-solid fa-volume-high text-gray-400"></i>
+                    <span class="font-bold text-sm text-gray-200">Geral</span>
+                    <span class="text-gray-600">|</span>
+                    <div class="flex items-center space-x-1.5 text-xs text-gray-400 font-medium">
+                        <i class="fa-solid fa-user text-[11px]"></i>
+                        <span>2 assistindo</span>
+                    </div>
+                </div>
+                <!-- Ações extras do canal se houver -->
+            </div>
+
+            <!-- Palco de Transmissão (Stream Container) -->
+            <div class="flex-1 p-5 flex items-center justify-center relative overflow-hidden">
+                <div class="w-full h-full rounded-2xl bg-black border border-gray-800/60 relative overflow-hidden shadow-2xl flex items-center justify-center">
+                    
+                    <!-- Wallpaper da Transmissão (Substitua pela imagem real ou stream) -->
+                    <div class="absolute inset-0 bg-cover bg-center filter brightness-90" style="background-image: url('https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=1920&q=80')"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20"></div>
+
+                    <!-- Atalhos simulados na Área de Trabalho do Stream -->
+                    <div class="absolute top-4 left-4 flex flex-col space-y-4 text-center z-10">
+                        <div class="flex flex-col items-center group cursor-pointer">
+                            <div class="w-9 h-9 rounded-lg bg-blue-600/80 backdrop-blur flex items-center justify-center text-white shadow-lg"><i class="fa-solid fa-desktop text-sm"></i></div>
+                            <span class="text-[10px] text-white drop-shadow mt-1 font-medium">Este Computador</span>
+                        </div>
+                        <div class="flex flex-col items-center group cursor-pointer">
+                            <div class="w-9 h-9 rounded-lg bg-gray-700/80 backdrop-blur flex items-center justify-center text-white shadow-lg"><i class="fa-solid fa-trash text-sm"></i></div>
+                            <span class="text-[10px] text-white drop-shadow mt-1 font-medium">Lixeira</span>
+                        </div>
+                        <div class="flex flex-col items-center group cursor-pointer">
+                            <div class="w-9 h-9 rounded-lg bg-white/90 backdrop-blur flex items-center justify-center text-red-500 shadow-lg"><i class="fa-brands fa-google text-sm"></i></div>
+                            <span class="text-[10px] text-white drop-shadow mt-1 font-medium">Chrome</span>
+                        </div>
+                    </div>
+
+                    <!-- Tag "AO VIVO" (Badge flutuante superior direito) -->
+                    <div class="absolute top-4 right-4 bg-red-600 text-white text-[11px] font-bold px-2.5 py-1 rounded-md flex items-center space-x-1.5 shadow-lg shadow-red-600/30 z-10">
+                        <span class="w-2 h-2 rounded-full bg-white animate-ping"></span>
+                        <span class="tracking-wider">AO VIVO</span>
+                    </div>
+
+                    <!-- Miniatura do Streamer (Canto inferior esquerdo do player) -->
+                    <div class="absolute bottom-4 left-4 bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-xl flex items-center space-x-2 z-10 shadow-lg">
+                        <div class="w-6 h-6 rounded-full bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=100&q=80')"></div>
+                        <span class="text-xs font-semibold text-white tracking-wide">JamesMaster</span>
+                    </div>
+
+                    <!-- Mini Barra de Tarefas do Windows simulada (Canto inferior direito do player) -->
+                    <div class="absolute bottom-3 right-4 flex items-center space-x-2 text-white/80 text-[10px] bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-lg z-10 border border-white/5">
+                        <i class="fa-solid fa-chevron-up text-[9px]"></i>
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>02:45<br>31/10/2026</span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Barra de Controles Inferior Centralizada -->
+            <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-20 flex items-center space-x-3 bg-darkSidebar/90 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/10 shadow-2xl">
+                <!-- Microfone -->
+                <button class="w-11 h-11 rounded-xl bg-gray-800/80 hover:bg-gray-700 text-white flex items-center justify-center transition shadow-md group relative">
+                    <i class="fa-solid fa-microphone text-sm group-hover:scale-110 transition"></i>
+                </button>
+                <!-- Câmera -->
+                <button class="w-11 h-11 rounded-xl bg-gray-800/80 hover:bg-gray-700 text-white flex items-center justify-center transition shadow-md group relative">
+                    <i class="fa-solid fa-video text-sm group-hover:scale-110 transition"></i>
+                </button>
+                <!-- Desconectar (Vermelho) -->
+                <button class="w-12 h-11 rounded-xl bg-red-600 hover:bg-red-500 text-white flex items-center justify-center transition shadow-lg shadow-red-600/30 group">
+                    <i class="fa-solid fa-phone-slash text-sm group-hover:scale-110 transition"></i>
+                </button>
+                <!-- Compartilhar Tela -->
+                <button class="w-11 h-11 rounded-xl bg-gray-800/80 hover:bg-gray-700 text-white flex items-center justify-center transition shadow-md group relative">
+                    <i class="fa-solid fa-desktop text-sm group-hover:scale-110 transition"></i>
+                </button>
+                <!-- Opções Extras (...) -->
+                <button class="w-11 h-11 rounded-xl bg-gray-800/80 hover:bg-gray-700 text-white flex items-center justify-center transition shadow-md group relative">
+                    <i class="fa-solid fa-ellipsis text-sm group-hover:scale-110 transition"></i>
+                </button>
+            </div>
+
+            <!-- Botão de Expandir / Tela Cheia (Canto inferior direito da tela principal) -->
+            <div class="absolute bottom-6 right-6 z-20 flex items-center space-x-2">
+                <button class="w-10 h-10 rounded-xl bg-darkSidebar/90 backdrop-blur-md border border-white/10 hover:bg-gray-800 text-white flex items-center justify-center transition shadow-lg">
+                    <i class="fa-solid fa-expand text-xs"></i>
+                </button>
+            </div>
+
+        </main>
+    </div>
+
+</body>
+</html>
