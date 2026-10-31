@@ -1,258 +1,261 @@
 <!DOCTYPE html>
 <html lang="pt-BR" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Share</title>
-    <!-- Tailwind CSS CDN para testes rápidos -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        darkSidebar: '#121214',
-                        darkMain: '#0b0b0d',
-                        darkPanel: '#18181b',
-                        accentBlue: '#2b55ff',
-                        accentHover: '#1f3ec9'
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- FontAwesome para ícones -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .hide-scrollbar {
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none;
-            width: 0;
-            height: 0;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MASTER SHARE</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class', theme: { extend: {
+      colors: { darkSidebar:'#121214', darkMain:'#0b0b0d', darkPanel:'#18181b', accentBlue:'#2b55ff', accentHover:'#1f3ec9' }
+    }}};
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .hide-scrollbar { scrollbar-width:none; -ms-overflow-style:none; }
+    .hide-scrollbar::-webkit-scrollbar { display:none; width:0; height:0; }
+  </style>
 </head>
 <body class="bg-darkMain text-gray-100 font-sans h-screen flex flex-col overflow-hidden select-none">
-
-    <!-- Barra de Título Superior (Janela Desktop) -->
-    <div class="h-9 bg-[#0e0e10] flex items-center justify-between px-4 border-b border-gray-800/60 text-xs">
-        <div class="flex items-center space-x-2">
-            <div class="w-5 h-5 bg-gradient-to-tr from-blue-600 to-cyan-400 rounded flex items-center justify-center text-white font-bold text-[10px] shadow-sm shadow-blue-500/50">M</div>
-            <span class="font-semibold text-gray-200 tracking-wide">MASTER SHARE</span>
-        </div>
-        <!-- Botões de Controle da Janela do Windows -->
-        <div class="flex items-center space-x-4 text-gray-400">
-            <button data-window="minimize" class="hover:text-white transition" title="Minimizar"><i class="fa-solid fa-minus text-[10px]"></i></button>
-            <button data-window="maximize" class="hover:text-white transition" title="Maximizar"><i class="fa-regular fa-square text-[10px]"></i></button>
-            <button data-window="close" class="hover:text-red-400 transition" title="Fechar"><i class="fa-solid fa-xmark text-sm"></i></button>
-        </div>
+  <div class="h-9 shrink-0 bg-[#0e0e10] flex items-center justify-between px-4 border-b border-gray-800/60 text-xs">
+    <div class="flex items-center space-x-2">
+      <div class="w-5 h-5 bg-gradient-to-tr from-blue-600 to-cyan-400 rounded flex items-center justify-center text-white font-bold text-[10px] shadow-sm shadow-blue-500/50">M</div>
+      <span class="font-semibold text-gray-200 tracking-wide">MASTER SHARE</span>
     </div>
-
-    <!-- Container Principal da Aplicação -->
-    <div class="flex flex-1 overflow-hidden">
-
-        <!-- Painel Lateral Esquerdo (Sidebar) -->
-        <aside class="w-64 bg-darkSidebar flex flex-col border-r border-gray-800/40">
-            
-            <!-- Seletor de Servidor -->
-            <div class="p-3 border-b border-gray-800/40 flex items-center justify-between cursor-pointer hover:bg-white/[0.02] transition">
-                <div class="flex items-center space-x-3">
-                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20">
-                        <i class="fa-solid fa-bolt text-white text-sm"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-sm font-bold text-gray-100 leading-tight">Game Confidencial</h2>
-                        <div class="flex items-center space-x-1.5 mt-0.5">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                            <span class="text-[11px] text-gray-400">3 membros online</span>
-                        </div>
-                    </div>
-                </div>
-                <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
-            </div>
-
-            <!-- Canais de Transmissão -->
-            <div class="flex-1 overflow-y-auto hide-scrollbar px-3 py-4 space-y-6">
-                <div>
-                    <div class="px-2 mb-2 text-[11px] font-bold uppercase tracking-wider text-gray-400 flex items-center justify-between">
-                        <span>Canais de Transmissão</span>
-                    </div>
-                    <div class="space-y-1">
-                        <button type="button" data-channel="Geral" class="channel-option w-full flex items-center justify-between px-3 py-2 rounded-lg text-gray-400 hover:bg-white/[0.04] hover:text-gray-200 transition text-sm text-left">
-                            <span class="flex items-center space-x-2.5"><i class="fa-solid fa-volume-high text-sm"></i><span>Geral</span></span>
-                            <span class="text-xs text-gray-500">0 / 5</span>
-                        </button>
-                        <button type="button" data-channel="Jogos" class="channel-option w-full flex items-center justify-between px-3 py-2 rounded-lg text-gray-400 hover:bg-white/[0.04] hover:text-gray-200 transition text-sm text-left">
-                            <span class="flex items-center space-x-2.5"><i class="fa-solid fa-volume-high text-sm"></i><span>Jogos</span></span>
-                            <span class="text-xs text-gray-500">0 / 5</span>
-                        </button>
-                        <button type="button" data-channel="Privado" class="channel-option w-full flex items-center justify-between px-3 py-2 rounded-lg text-gray-400 hover:bg-white/[0.04] hover:text-gray-200 transition text-sm text-left">
-                            <span class="flex items-center space-x-2.5"><i class="fa-solid fa-lock text-xs"></i><span>Privado</span></span>
-                            <span class="text-xs text-gray-500">0 / 5</span>
-                        </button>
-                    </div>
-
-                </div>
-
-                <!-- Lista de Usuários -->
-                <div>
-                    <div class="px-2 mb-2 text-[11px] font-bold uppercase tracking-wider text-gray-400">Usuários</div>
-                    <div id="user-list" class="px-2 py-3 text-xs text-gray-500">
-                        Nenhum usuário conectado.
-                    </div>
-                </div>
-            </div>
-
-            <!-- Rodapé da Sidebar -->
-            <div class="p-3 bg-[#0d0d0f] border-t border-gray-800/40 flex items-center justify-between">
-                <div class="flex items-center space-x-2.5">
-                    <span id="connection-indicator" class="w-2 h-2 rounded-full bg-gray-500"></span>
-                    <div>
-                        <p id="connection-status" class="text-xs font-bold text-gray-400">Desconectado</p>
-                        <p id="connection-channel" class="text-[10px] text-gray-500 truncate w-32">Nenhum canal</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-2 text-gray-400">
-                    <button class="w-7 h-7 rounded-lg hover:bg-white/5 hover:text-white transition flex items-center justify-center" title="Áudio (em breve)"><i class="fa-solid fa-headphones text-xs"></i></button>
-                    <button class="w-7 h-7 rounded-lg hover:bg-white/5 hover:text-white transition flex items-center justify-center" title="Configurações (em breve)"><i class="fa-solid fa-gear text-xs"></i></button>
-                </div>
-            </div>
-
-        </aside>
-
-        <!-- Área Principal de Conteúdo -->
-        <main class="flex-1 flex flex-col bg-darkMain relative">
-            
-            <!-- Barra Superior do Canal -->
-            <div class="h-12 border-b border-gray-800/40 px-6 flex items-center justify-between bg-darkMain/50 backdrop-blur">
-                <div class="flex items-center space-x-3">
-                    <i class="fa-solid fa-volume-high text-gray-400"></i>
-                    <span id="active-channel-title" class="font-bold text-sm text-gray-200">Nenhum canal selecionado</span>
-                    <span class="text-gray-600">|</span>
-                    <span id="channel-members" class="text-xs text-gray-500">0 usuários</span>
-                </div>
-                <button id="join-channel" type="button" class="px-4 py-2 rounded-lg bg-accentBlue hover:bg-accentHover text-white text-xs font-semibold transition">Conectar ao canal            <!-- Palco de Transmissão -->
-            <div class="flex-1 p-5 flex items-center justify-center relative overflow-hidden">
-                <div id="stream-stage" class="w-full h-full rounded-2xl bg-[#080809] border border-gray-800/60 relative overflow-hidden shadow-2xl flex flex-col items-center justify-center text-center px-6">
-                    <div class="w-16 h-16 rounded-2xl bg-gray-900 border border-gray-800 flex items-center justify-center mb-4">
-                        <i class="fa-solid fa-display text-2xl text-gray-600"></i>
-                    </div>
-                    <h3 id="stage-title" class="text-base font-semibold text-gray-300">Nenhum canal conectado</h3>
-                    <p id="stage-description" class="mt-2 text-sm text-gray-500 max-w-md">Selecione um canal na lateral e clique em “Conectar ao canal”. A área de transmissão ficará pronta para receber sua tela.</p>
-                </div>
-            </div>
-
-            <!-- Controles: serão ativados nas próximas etapas -->
-            <div id="channel-controls" class="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-20 flex items-center space-x-3 bg-darkSidebar/90 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/10 shadow-2xl opacity-40 pointer-events-none">
-                <button class="w-11 h-11 rounded-xl bg-gray-800/80 text-gray-500 flex items-center justify-center" title="Microfone (em breve)"><i class="fa-solid fa-microphone text-sm"></i></button>
-                <button class="w-11 h-11 rounded-xl bg-gray-800/80 text-gray-500 flex items-center justify-center" title="Câmera (em breve)"><i class="fa-solid fa-video text-sm"></i></button>
-                <button id="leave-channel" class="w-12 h-11 rounded-xl bg-red-600 hover:bg-red-500 text-white flex items-center justify-center transition" title="Sair do canal" disabled><i class="fa-solid fa-phone-slash text-sm"></i></button>
-                <button class="w-11 h-11 rounded-xl bg-gray-800/80 text-gray-500 flex items-center justify-center" title="Compartilhar tela (próxima etapa)"><i class="fa-solid fa-desktop text-sm"></i></button>
-                <button class="w-11 h-11 rounded-xl bg-gray-800/80 text-gray-500 flex items-center justify-center" title="Mais opções (em breve)"><i class="fa-solid fa-ellipsis text-sm"></i></button>
-            </div>
-
-        </main>
+    <div class="flex items-center space-x-4 text-gray-400">
+      <button data-window="minimize" class="hover:text-white transition" title="Minimizar"><i class="fa-solid fa-minus text-[10px]"></i></button>
+      <button data-window="maximize" class="hover:text-white transition" title="Maximizar"><i class="fa-regular fa-square text-[10px]"></i></button>
+      <button data-window="close" class="hover:text-red-400 transition" title="Fechar"><i class="fa-solid fa-xmark text-sm"></i></button>
     </div>
+  </div>
 
+  <div class="flex flex-1 overflow-hidden">
+    <aside class="w-64 shrink-0 bg-darkSidebar flex flex-col border-r border-gray-800/40">
+      <div class="p-3 border-b border-gray-800/40 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20"><i class="fa-solid fa-bolt text-white text-sm"></i></div>
+          <div><h2 class="text-sm font-bold text-gray-100 leading-tight">Game Confidencial</h2><div class="flex items-center space-x-1.5 mt-0.5"><span class="w-2 h-2 rounded-full bg-gray-500"></span><span class="text-[11px] text-gray-400">Servidor de teste</span></div></div>
+        </div>
+        <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
+      </div>
 
-    <script>
-      (() => {
-        const send = (action, data = {}) => {
-          if (window.chrome && window.chrome.webview) {
-            window.chrome.webview.postMessage({ action, ...data });
-          }
-        };
+      <div class="flex-1 overflow-y-auto hide-scrollbar px-3 py-4 space-y-6">
+        <section>
+          <div class="px-2 mb-2 text-[11px] font-bold uppercase tracking-wider text-gray-400">Canais de texto</div>
+          <div class="space-y-1">
+            <button type="button" data-text-channel="geral" class="text-channel w-full flex items-center px-3 py-2 rounded-lg bg-accentBlue text-white text-sm text-left"><i class="fa-solid fa-hashtag mr-2.5 text-gray-300"></i>geral</button>
+          </div>
+        </section>
+        <section>
+          <div class="px-2 mb-2 text-[11px] font-bold uppercase tracking-wider text-gray-400">Canais de voz</div>
+          <div class="space-y-1">
+            <button type="button" data-voice-channel="Geral" class="voice-channel w-full flex items-center justify-between px-3 py-2 rounded-lg text-gray-400 hover:bg-white/[0.04] hover:text-gray-200 transition text-sm text-left"><span class="flex items-center"><i class="fa-solid fa-volume-high mr-2.5"></i>Geral</span><span class="text-xs text-gray-500">0 / 5</span></button>
+            <button type="button" data-voice-channel="Jogos" class="voice-channel w-full flex items-center justify-between px-3 py-2 rounded-lg text-gray-400 hover:bg-white/[0.04] hover:text-gray-200 transition text-sm text-left"><span class="flex items-center"><i class="fa-solid fa-volume-high mr-2.5"></i>Jogos</span><span class="text-xs text-gray-500">0 / 5</span></button>
+            <button type="button" data-voice-channel="Privado" class="voice-channel w-full flex items-center justify-between px-3 py-2 rounded-lg text-gray-400 hover:bg-white/[0.04] hover:text-gray-200 transition text-sm text-left"><span class="flex items-center"><i class="fa-solid fa-lock mr-2.5"></i>Privado</span><span class="text-xs text-gray-500">0 / 5</span></button>
+          </div>
+        </section>
+        <section id="voice-users-section" class="hidden">
+          <div class="px-2 mb-2 text-[11px] font-bold uppercase tracking-wider text-gray-400">Usuários na voz</div>
+          <div id="user-list" class="px-2 py-2 text-xs text-gray-500"></div>
+        </section>
+      </div>
 
-        document.querySelectorAll('[data-window]').forEach(button => {
-          button.addEventListener('click', () => send('window', { command: button.dataset.window }));
-        });
+      <div class="p-3 bg-[#0d0d0f] border-t border-gray-800/40 flex items-center justify-between">
+        <div class="flex items-center space-x-2.5">
+          <span id="connection-indicator" class="w-2 h-2 rounded-full bg-gray-500"></span>
+          <div><p id="connection-status" class="text-xs font-bold text-gray-400">Navegando</p><p id="connection-channel" class="text-[10px] text-gray-500 truncate w-32">#geral</p></div>
+        </div>
+        <div class="flex items-center space-x-2 text-gray-400">
+          <button class="w-7 h-7 rounded-lg hover:bg-white/5 hover:text-white transition flex items-center justify-center" title="Áudio (em breve)"><i class="fa-solid fa-headphones text-xs"></i></button>
+          <button class="w-7 h-7 rounded-lg hover:bg-white/5 hover:text-white transition flex items-center justify-center" title="Configurações (em breve)"><i class="fa-solid fa-gear text-xs"></i></button>
+        </div>
+      </div>
+    </aside>
 
-        const channelButtons = [...document.querySelectorAll('[data-channel]')];
-        const joinButton = document.getElementById('join-channel');
-        const leaveButton = document.getElementById('leave-channel');
-        const title = document.getElementById('active-channel-title');
-        const members = document.getElementById('channel-members');
-        const status = document.getElementById('connection-status');
-        const statusChannel = document.getElementById('connection-channel');
-        const indicator = document.getElementById('connection-indicator');
-        const userList = document.getElementById('user-list');
-        const stageTitle = document.getElementById('stage-title');
-        const stageDescription = document.getElementById('stage-description');
-        const controls = document.getElementById('channel-controls');
+    <main class="flex-1 min-w-0 flex flex-col bg-darkMain relative">
+      <div class="h-12 shrink-0 border-b border-gray-800/40 px-6 flex items-center justify-between bg-darkMain/50">
+        <div class="flex items-center space-x-3 min-w-0">
+          <i id="header-icon" class="fa-solid fa-hashtag text-gray-400"></i>
+          <span id="active-channel-title" class="font-bold text-sm text-gray-200">geral</span>
+          <span class="text-gray-600">|</span>
+          <span id="channel-subtitle" class="text-xs text-gray-500">Canal de texto</span>
+        </div>
+        <button id="join-channel" type="button" class="hidden px-4 py-2 rounded-lg bg-accentBlue hover:bg-accentHover text-white text-xs font-semibold transition">Conectar ao canal</button>
+      </div>
 
-        let selectedChannel = null;
-        let connectedChannel = null;
+      <section id="chat-view" class="flex-1 min-h-0 flex flex-col">
+        <div id="chat-messages" class="flex-1 overflow-y-auto hide-scrollbar p-6 space-y-5">
+          <div class="border-b border-gray-800/70 pb-5">
+            <div class="w-12 h-12 rounded-full bg-[#252a38] flex items-center justify-center mb-3"><i class="fa-solid fa-hashtag text-xl text-gray-300"></i></div>
+            <h2 class="text-2xl font-bold text-white mb-1">Bem-vindo ao #geral!</h2>
+            <p class="text-sm text-gray-400">Esse é o começo do canal de texto. Use este espaço para testar as mensagens do MASTER SHARE.</p>
+          </div>
+          <div id="empty-chat-hint" class="text-xs text-gray-600 text-center py-4">As mensagens enviadas neste teste aparecem aqui e ficam apenas neste computador.</div>
+        </div>
+        <form id="chat-form" class="p-5 pt-2">
+          <div class="flex items-center gap-3 bg-[#18181b] border border-gray-800 rounded-xl px-4 py-2 focus-within:border-blue-500/60">
+            <button type="button" class="text-gray-500 hover:text-gray-300" title="Anexos (em breve)" disabled><i class="fa-solid fa-plus"></i></button>
+            <input id="chat-input" type="text" maxlength="1000" autocomplete="off" placeholder="Conversar em #geral" class="flex-1 bg-transparent outline-none text-sm text-gray-200 placeholder-gray-500 py-2" />
+            <button type="submit" class="w-9 h-9 rounded-lg bg-accentBlue hover:bg-accentHover text-white flex items-center justify-center transition" title="Enviar mensagem"><i class="fa-solid fa-paper-plane text-xs"></i></button>
+          </div>
+          <p class="text-[10px] text-gray-600 mt-2 px-1">Modo de teste local • mensagens não são enviadas para outros computadores ainda</p>
+        </form>
+      </section>
 
-        function render() {
-          channelButtons.forEach(button => {
-            const active = button.dataset.channel === selectedChannel;
-            button.className = 'channel-option w-full flex items-center justify-between px-3 py-2 rounded-lg transition text-sm text-left ' +
-              (active ? 'bg-accentBlue text-white shadow-lg shadow-blue-600/20' : 'text-gray-400 hover:bg-white/[0.04] hover:text-gray-200');
-            button.querySelector('span:last-child').textContent =
-              button.dataset.channel === connectedChannel ? '1 / 5' : '0 / 5';
-          });
+      <section id="voice-view" class="hidden flex-1 min-h-0 p-5 items-center justify-center relative overflow-hidden">
+        <div class="w-full h-full rounded-2xl bg-[#080809] border border-gray-800/60 flex flex-col items-center justify-center text-center px-6">
+          <div class="w-16 h-16 rounded-2xl bg-gray-900 border border-gray-800 flex items-center justify-center mb-4"><i class="fa-solid fa-volume-high text-2xl text-gray-500"></i></div>
+          <h3 id="voice-stage-title" class="text-base font-semibold text-gray-300">Conectado ao canal</h3>
+          <p id="voice-stage-description" class="mt-2 text-sm text-gray-500 max-w-md">A conexão de voz entre computadores será implementada na próxima etapa.</p>
+        </div>
+      </section>
 
-          const connected = Boolean(connectedChannel);
-          title.textContent = selectedChannel || 'Nenhum canal selecionado';
-          members.textContent = connected ? '1 usuário neste dispositivo' : '0 usuários';
-          joinButton.textContent = connected
-            ? (connectedChannel === selectedChannel ? 'Conectado' : 'Trocar de canal')
-            : 'Conectar ao canal';
-          joinButton.disabled = !selectedChannel || connectedChannel === selectedChannel;
-          joinButton.classList.toggle('opacity-50', joinButton.disabled);
-          leaveButton.disabled = !connected;
-          leaveButton.classList.toggle('opacity-40', !connected);
-          controls.classList.toggle('opacity-40', !connected);
-          controls.classList.toggle('pointer-events-none', !connected);
+      <div id="voice-controls" class="hidden absolute bottom-6 left-1/2 -translate-x-1/2 z-20 items-center space-x-3 bg-darkSidebar/95 px-4 py-2.5 rounded-2xl border border-white/10 shadow-2xl">
+        <button class="w-11 h-11 rounded-xl bg-gray-800/80 text-gray-500 flex items-center justify-center" title="Microfone (em breve)" disabled><i class="fa-solid fa-microphone text-sm"></i></button>
+        <button class="w-11 h-11 rounded-xl bg-gray-800/80 text-gray-500 flex items-center justify-center" title="Câmera (em breve)" disabled><i class="fa-solid fa-video text-sm"></i></button>
+        <button id="leave-channel" class="w-12 h-11 rounded-xl bg-red-600 hover:bg-red-500 text-white flex items-center justify-center transition" title="Sair do canal"><i class="fa-solid fa-phone-slash text-sm"></i></button>
+        <button class="w-11 h-11 rounded-xl bg-gray-800/80 text-gray-500 flex items-center justify-center" title="Compartilhar tela (próxima etapa)" disabled><i class="fa-solid fa-desktop text-sm"></i></button>
+        <button class="w-11 h-11 rounded-xl bg-gray-800/80 text-gray-500 flex items-center justify-center" title="Mais opções (em breve)" disabled><i class="fa-solid fa-ellipsis text-sm"></i></button>
+      </div>
+    </main>
+  </div>
 
-          status.textContent = connected ? 'Conectado localmente' : 'Desconectado';
-          status.className = 'text-xs font-bold ' + (connected ? 'text-emerald-400' : 'text-gray-400');
-          indicator.className = 'w-2 h-2 rounded-full ' + (connected ? 'bg-emerald-500' : 'bg-gray-500');
-          statusChannel.textContent = connected ? connectedChannel + ' • Game Confidencial' : 'Nenhum canal';
+  <script>
+    (() => {
+      const send = (action, data = {}) => {
+        if (window.chrome && window.chrome.webview) window.chrome.webview.postMessage({ action, ...data });
+      };
+      document.querySelectorAll('[data-window]').forEach(button => button.addEventListener('click', () => send('window', { command: button.dataset.window })));
 
-          userList.innerHTML = connected
-            ? '<div class="flex items-center space-x-2.5 py-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><span class="text-sm text-gray-200 font-medium">JamesMaster</span><span class="text-[10px] text-gray-500">Você</span></div>'
-            : 'Nenhum usuário conectado.';
+      const textButtons = [...document.querySelectorAll('[data-text-channel]')];
+      const voiceButtons = [...document.querySelectorAll('[data-voice-channel]')];
+      const chatView = document.getElementById('chat-view');
+      const voiceView = document.getElementById('voice-view');
+      const voiceControls = document.getElementById('voice-controls');
+      const joinButton = document.getElementById('join-channel');
+      const leaveButton = document.getElementById('leave-channel');
+      const title = document.getElementById('active-channel-title');
+      const subtitle = document.getElementById('channel-subtitle');
+      const headerIcon = document.getElementById('header-icon');
+      const status = document.getElementById('connection-status');
+      const statusChannel = document.getElementById('connection-channel');
+      const indicator = document.getElementById('connection-indicator');
+      const usersSection = document.getElementById('voice-users-section');
+      const userList = document.getElementById('user-list');
+      const chatMessages = document.getElementById('chat-messages');
+      const chatInput = document.getElementById('chat-input');
+      let selectedVoice = null;
+      let connectedVoice = null;
+      let currentText = 'geral';
 
-          stageTitle.textContent = connected ? 'Você está no canal ' + connectedChannel : 'Nenhum canal conectado';
-          stageDescription.textContent = connected
-            ? 'Canal conectado neste dispositivo. A próxima etapa será transmitir sua tela para esta área.'
-            : 'Selecione um canal na lateral e clique em “Conectar ao canal”. A área de transmissão ficará pronta para receber sua tela.';
-        }
-
-        channelButtons.forEach(button => {
-          button.addEventListener('click', () => {
-            selectedChannel = button.dataset.channel;
-            render();
-          });
-        });
-
-        joinButton.addEventListener('click', () => {
-          if (!selectedChannel) return;
-          connectedChannel = selectedChannel;
-          render();
-          // Estado local de interface. A conexão entre computadores será adicionada com o servidor.
-        });
-
-        leaveButton.addEventListener('click', () => {
-          connectedChannel = null;
-          render();
-        });
-
-        window.masterShare = { send };
-        window.addEventListener('message', event => {
-          if (event.data && event.data.type === 'master-share-host') {
-            document.documentElement.dataset.hostReady = 'true';
-          }
-        });
-
+      function showTextChannel(name) {
+        currentText = name;
+        selectedVoice = null;
+        connectedVoice = null;
         render();
-      })();
-    </script>
+      }
 
+      function render() {
+        const inVoice = Boolean(connectedVoice);
+        const onText = !selectedVoice;
+        textButtons.forEach(button => {
+          const active = onText && button.dataset.textChannel === currentText;
+          button.className = 'text-channel w-full flex items-center px-3 py-2 rounded-lg text-sm text-left transition ' +
+            (active ? 'bg-accentBlue text-white' : 'text-gray-400 hover:bg-white/[0.04] hover:text-gray-200');
+        });
+        voiceButtons.forEach(button => {
+          const active = button.dataset.voiceChannel === selectedVoice;
+          button.className = 'voice-channel w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm text-left transition ' +
+            (active ? 'bg-accentBlue text-white' : 'text-gray-400 hover:bg-white/[0.04] hover:text-gray-200');
+          button.querySelector('span:last-child').textContent = button.dataset.voiceChannel === connectedVoice ? '1 / 5' : '0 / 5';
+        });
+
+        chatView.classList.toggle('hidden', !onText);
+        voiceView.classList.toggle('hidden', !inVoice);
+        voiceView.classList.toggle('flex', inVoice);
+        voiceControls.classList.toggle('hidden', !inVoice);
+        voiceControls.classList.toggle('flex', inVoice);
+        joinButton.classList.toggle('hidden', !selectedVoice || inVoice);
+
+        if (onText) {
+          title.textContent = currentText;
+          subtitle.textContent = 'Canal de texto';
+          headerIcon.className = 'fa-solid fa-hashtag text-gray-400';
+          status.textContent = 'Canal de texto';
+          status.className = 'text-xs font-bold text-emerald-400';
+          indicator.className = 'w-2 h-2 rounded-full bg-emerald-500';
+          statusChannel.textContent = '#' + currentText;
+          usersSection.classList.add('hidden');
+          chatInput.placeholder = 'Conversar em #' + currentText;
+        } else {
+          title.textContent = selectedVoice;
+          subtitle.textContent = inVoice ? 'Conectado neste dispositivo' : 'Canal de voz • não conectado';
+          headerIcon.className = 'fa-solid fa-volume-high text-gray-400';
+          status.textContent = inVoice ? 'Conectado localmente' : 'Não conectado';
+          status.className = 'text-xs font-bold ' + (inVoice ? 'text-emerald-400' : 'text-gray-400');
+          indicator.className = 'w-2 h-2 rounded-full ' + (inVoice ? 'bg-emerald-500' : 'bg-gray-500');
+          statusChannel.textContent = selectedVoice + ' • Game Confidencial';
+          usersSection.classList.toggle('hidden', !inVoice);
+          userList.innerHTML = inVoice ? '<div class="flex items-center space-x-2.5 py-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><span class="text-sm text-gray-200 font-medium">JamesMaster</span><span class="text-[10px] text-gray-500">Você</span></div>' : '';
+          document.getElementById('voice-stage-title').textContent = 'Você está no canal ' + selectedVoice;
+          document.getElementById('voice-stage-description').textContent = 'Conectado localmente neste teste. A conexão de voz entre computadores será implementada depois.';
+        }
+      }
+
+      textButtons.forEach(button => button.addEventListener('click', () => showTextChannel(button.dataset.textChannel)));
+      voiceButtons.forEach(button => button.addEventListener('click', () => {
+        selectedVoice = button.dataset.voiceChannel;
+        connectedVoice = null;
+        render();
+      }));
+      joinButton.addEventListener('click', () => {
+        if (!selectedVoice) return;
+        connectedVoice = selectedVoice;
+        render();
+      });
+      leaveButton.addEventListener('click', () => {
+        connectedVoice = null;
+        selectedVoice = null;
+        currentText = 'geral';
+        render();
+      });
+
+      document.getElementById('chat-form').addEventListener('submit', event => {
+        event.preventDefault();
+        const message = chatInput.value.trim();
+        if (!message) return;
+        const row = document.createElement('div');
+        row.className = 'flex items-start gap-3';
+        const avatar = document.createElement('div');
+        avatar.className = 'w-9 h-9 shrink-0 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-xs font-bold';
+        avatar.textContent = 'J';
+        const body = document.createElement('div');
+        body.className = 'min-w-0';
+        const meta = document.createElement('div');
+        meta.className = 'flex items-center gap-2 mb-1';
+        const name = document.createElement('span');
+        name.className = 'text-sm font-semibold text-gray-200';
+        name.textContent = 'JamesMaster';
+        const time = document.createElement('span');
+        time.className = 'text-[10px] text-gray-500';
+        time.textContent = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+        const text = document.createElement('p');
+        text.className = 'text-sm text-gray-300 whitespace-pre-wrap break-words';
+        text.textContent = message;
+        meta.append(name, time);
+        body.append(meta, text);
+        row.append(avatar, body);
+        chatMessages.appendChild(row);
+        chatInput.value = '';
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      });
+
+      window.masterShare = { send };
+      window.addEventListener('message', event => {
+        if (event.data && event.data.type === 'master-share-host') document.documentElement.dataset.hostReady = 'true';
+      });
+      render();
+    })();
+  </script>
 </body>
 </html>
