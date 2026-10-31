@@ -24,6 +24,17 @@
     </script>
     <!-- FontAwesome para ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .hide-scrollbar {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+            width: 0;
+            height: 0;
+        }
+    </style>
 </head>
 <body class="bg-darkMain text-gray-100 font-sans h-screen flex flex-col overflow-hidden select-none">
 
@@ -65,7 +76,7 @@
             </div>
 
             <!-- Canais de Transmissão -->
-            <div class="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+            <div class="flex-1 overflow-y-auto hide-scrollbar px-3 py-4 space-y-6">
                 <div>
                     <div class="px-2 mb-2 text-[11px] font-bold uppercase tracking-wider text-gray-400 flex items-center justify-between">
                         <span>Canais de Transmissão</span>
