@@ -67,7 +67,7 @@
         </div>
         <div class="flex items-center space-x-2 text-gray-400">
           <button class="w-7 h-7 rounded-lg hover:bg-white/5 hover:text-white transition flex items-center justify-center" title="Áudio (em breve)"><i class="fa-solid fa-headphones text-xs"></i></button>
-          <button class="w-7 h-7 rounded-lg hover:bg-white/5 hover:text-white transition flex items-center justify-center" title="Configurações (em breve)"><i class="fa-solid fa-gear text-xs"></i></button>
+          <button id="edit-username" class="w-7 h-7 rounded-lg hover:bg-white/5 hover:text-white transition flex items-center justify-center" title="Alterar nome de usuário"><i class="fa-solid fa-user-pen text-xs"></i></button>
         </div>
       </div>
     </aside>
@@ -189,6 +189,8 @@
       let selectedVoice = null;
       let connectedVoice = null;
       let currentText = 'geral';
+      let username = localStorage.getItem('masterShare.username') || 'JamesMaster';
+      username = username.trim().slice(0, 24) || 'Usuário';
 
       function showTextChannel(name) {
         currentText = name;
@@ -239,11 +241,38 @@
           indicator.className = 'w-2 h-2 rounded-full ' + (inVoice ? 'bg-emerald-500' : 'bg-gray-500');
           statusChannel.textContent = selectedVoice + ' • Game Confidencial';
           usersSection.classList.toggle('hidden', !inVoice);
-          userList.innerHTML = inVoice ? '<div class="flex items-center space-x-2.5 py-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><span class="text-sm text-gray-200 font-medium">JamesMaster</span><span class="text-[10px] text-gray-500">Você</span></div>' : '';
+          userList.replaceChildren();
+          if (inVoice) {
+            const userRow = document.createElement('div');
+            userRow.className = 'flex items-center space-x-2.5 py-1.5';
+            const dot = document.createElement('span');
+            dot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+            const userName = document.createElement('span');
+            userName.className = 'text-sm text-gray-200 font-medium';
+            userName.textContent = username;
+            const you = document.createElement('span');
+            you.className = 'text-[10px] text-gray-500';
+            you.textContent = 'Você';
+            userRow.append(dot, userName, you);
+            userList.appendChild(userRow);
+          }
           document.getElementById('voice-stage-title').textContent = 'Você está no canal ' + selectedVoice;
           document.getElementById('voice-stage-description').textContent = 'Conectado localmente neste teste. A conexão de voz entre computadores será implementada depois.';
         }
       }
+
+      document.getElementById('edit-username').addEventListener('click', () => {
+        const enteredName = window.prompt('Como você quer aparecer no MASTER SHARE?', username);
+        if (enteredName === null) return;
+        const cleanName = enteredName.trim().replace(/\\s+/g, ' ').slice(0, 24);
+        if (!cleanName) {
+          alert('Digite um nome válido para continuar.');
+          return;
+        }
+        username = cleanName;
+        localStorage.setItem('masterShare.username', username);
+        render();
+      });
 
       textButtons.forEach(button => button.addEventListener('click', () => showTextChannel(button.dataset.textChannel)));
       voiceButtons.forEach(button => button.addEventListener('click', () => {
@@ -370,7 +399,7 @@
         meta.className = 'flex items-center gap-2 mb-1';
         const name = document.createElement('span');
         name.className = 'text-sm font-semibold text-gray-200';
-        name.textContent = 'JamesMaster';
+        name.textContent = username;
         const time = document.createElement('span');
         time.className = 'text-[10px] text-gray-500';
         time.textContent = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
