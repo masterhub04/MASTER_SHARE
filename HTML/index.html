@@ -324,7 +324,6 @@
           await waitForIceGathering(receiverPeer);
           await senderPeer.setRemoteDescription(receiverPeer.localDescription);
 
-          shareVideo.srcObject = null;
           voicePlaceholder.classList.add('hidden');
           shareStage.classList.remove('hidden');
           shareStage.classList.add('flex');
