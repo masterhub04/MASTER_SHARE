@@ -157,7 +157,7 @@
 
       function render() {
         const inVoice = Boolean(connectedVoice);
-        const onText = !selectedVoice;
+        const onText = !inVoice;
         textButtons.forEach(button => {
           const active = onText && button.dataset.textChannel === currentText;
           button.className = 'text-channel w-full flex items-center px-3 py-2 rounded-lg text-sm text-left transition ' +
@@ -176,10 +176,11 @@
         voiceControls.classList.toggle('hidden', !inVoice);
         voiceControls.classList.toggle('flex', inVoice);
         joinButton.classList.toggle('hidden', !selectedVoice || inVoice);
+        joinButton.textContent = selectedVoice ? 'Entrar na voz: ' + selectedVoice : 'Conectar ao canal';
 
         if (onText) {
           title.textContent = currentText;
-          subtitle.textContent = 'Canal de texto';
+          subtitle.textContent = selectedVoice ? 'Canal de texto • voz selecionada: ' + selectedVoice : 'Canal de texto';
           headerIcon.className = 'fa-solid fa-hashtag text-gray-400';
           status.textContent = 'Canal de texto';
           status.className = 'text-xs font-bold text-emerald-400';
