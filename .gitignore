@@ -1,0 +1,36 @@
+# Build do .NET
+bin/
+obj/
+[Bb]uild/
+[Dd]ebug/
+[Rr]elease/
+artifacts/
+TestResults/
+
+# Visual Studio / Rider
+.vs/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+_ReSharper*/
+*.DotSettings.user
+
+# VS Code
+.vscode/
+
+# Logs e temporários
+*.log
+*.tmp
+*.cache
+*.bak
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Pacotes e artefatos locais
+*.nupkg
+*.snupkg
