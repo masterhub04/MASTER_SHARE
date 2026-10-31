@@ -1,0 +1,54 @@
+name: Build MASTER SHARE Installer
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - '**.cs'
+      - '**.xaml'
+      - '**.csproj'
+      - 'HTML/**'
+      - 'installer/**'
+      - '.github/workflows/build-installer.yml'
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Setup Inno Setup
+        run: choco install innosetup --yes --no-progress
+
+      - name: Publish application
+        shell: pwsh
+        run: |
+          dotnet publish .\MASTER_SHARE.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -o .\publish
+
+      - name: Download WebView2 Runtime bootstrapper
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force .\runtime | Out-Null
+          Invoke-WebRequest -Uri "https://go.microsoft.com/fwlink/p/?LinkId=2124703" -OutFile .\runtime\MicrosoftEdgeWebView2Setup.exe
+
+      - name: Build installer
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force .\dist | Out-Null
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" .\installer\MASTER_SHARE.iss
+          if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed." }
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MASTER-SHARE-Installer-x64
+          path: dist/*.exe
+          if-no-files-found: error
+          retention-days: 30
