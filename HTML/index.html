@@ -11,6 +11,7 @@
     }}};
   </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
   <style>
     .hide-scrollbar { scrollbar-width:none; -ms-overflow-style:none; }
     .hide-scrollbar::-webkit-scrollbar { display:none; width:0; height:0; }
@@ -121,7 +122,7 @@
       </section>
 
       <div id="voice-controls" class="hidden absolute bottom-6 left-1/2 -translate-x-1/2 z-20 items-center space-x-3 bg-darkSidebar/95 px-4 py-2.5 rounded-2xl border border-white/10 shadow-2xl">
-        <button class="w-11 h-11 rounded-xl bg-gray-800/80 text-gray-500 flex items-center justify-center" title="Microfone (em breve)" disabled><i class="fa-solid fa-microphone text-sm"></i></button>
+        <button id="toggle-mic" class="w-11 h-11 rounded-xl bg-gray-800/80 hover:bg-blue-600 text-gray-200 flex items-center justify-center transition" title="Ativar microfone"><i class="fa-solid fa-microphone-slash text-sm"></i></button>
         <button class="w-11 h-11 rounded-xl bg-gray-800/80 text-gray-500 flex items-center justify-center" title="Câmera (em breve)" disabled><i class="fa-solid fa-video text-sm"></i></button>
         <button id="leave-channel" class="w-12 h-11 rounded-xl bg-red-600 hover:bg-red-500 text-white flex items-center justify-center transition" title="Sair do canal"><i class="fa-solid fa-phone-slash text-sm"></i></button>
         <button id="start-screen-share" class="w-11 h-11 rounded-xl bg-gray-800/80 hover:bg-blue-600 text-gray-200 hover:text-white flex items-center justify-center transition" title="Compartilhar tela"><i class="fa-solid fa-desktop text-sm"></i></button>
@@ -130,6 +131,25 @@
     </main>
   </div>
 
+
+  <div id="livekit-modal" class="hidden fixed inset-0 z-50 bg-black/80 items-center justify-center p-5">
+    <div class="w-full max-w-xl rounded-2xl border border-gray-700 bg-[#151519] p-6 shadow-2xl">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-lg font-bold text-white">Conectar ao LiveKit</h2>
+        <button id="close-livekit-modal" class="text-gray-400 hover:text-white" title="Fechar"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <p class="text-sm text-gray-400 mb-5">Informe o endereço do servidor e um token de acesso para entrar na sala selecionada. O token deve permitir entrar na sala e publicar/receber áudio e vídeo.</p>
+      <label class="block text-xs font-semibold text-gray-300 mb-1">Endereço LiveKit (wss://...)</label>
+      <input id="livekit-url" type="url" placeholder="wss://seu-projeto.livekit.cloud" class="w-full mb-4 rounded-lg border border-gray-700 bg-[#0b0b0d] px-3 py-2.5 text-sm text-white outline-none focus:border-blue-500" />
+      <label class="block text-xs font-semibold text-gray-300 mb-1">Token de acesso (JWT)</label>
+      <textarea id="livekit-token" rows="4" spellcheck="false" placeholder="Cole aqui o token gerado para esta sala e para este participante" class="w-full resize-y rounded-lg border border-gray-700 bg-[#0b0b0d] px-3 py-2.5 text-xs text-white outline-none focus:border-blue-500"></textarea>
+      <p class="text-[11px] text-amber-300/90 mt-3">Por segurança, o token não será salvo. Cada participante precisa de um token próprio para a mesma sala.</p>
+      <div class="flex justify-end gap-2 mt-5">
+        <button id="cancel-livekit" class="px-4 py-2 rounded-lg border border-gray-700 text-gray-300 hover:bg-white/5 text-sm">Cancelar</button>
+        <button id="connect-livekit" class="px-4 py-2 rounded-lg bg-accentBlue hover:bg-accentHover text-white text-sm font-semibold">Conectar</button>
+      </div>
+    </div>
+  </div>
   <script>
     (() => {
       const send = (action, data = {}) => {
@@ -146,37 +166,28 @@
       const joinButton = document.getElementById('join-channel');
       const leaveButton = document.getElementById('leave-channel');
       const startShareButton = document.getElementById('start-screen-share');
+      const micButton = document.getElementById('toggle-mic');
       const shareStage = document.getElementById('screen-share-stage');
       const shareVideo = document.getElementById('screen-share-video');
       const voicePlaceholder = document.getElementById('voice-placeholder');
-      let screenStream = null;
-      let senderPeer = null;
-      let receiverPeer = null;
+      const modal = document.getElementById('livekit-modal');
+      const urlInput = document.getElementById('livekit-url');
+      const tokenInput = document.getElementById('livekit-token');
+      const connectButton = document.getElementById('connect-livekit');
+      const remoteMedia = document.createElement('div');
+      remoteMedia.id = 'remote-media-grid';
+      remoteMedia.className = 'w-full grid grid-cols-1 md:grid-cols-2 gap-3';
+      shareStage.parentElement.insertBefore(remoteMedia, shareStage);
+      let room = null;
+      let selectedVoice = null;
+      let connectedVoice = null;
+      let currentText = 'geral';
+      let username = localStorage.getItem('masterShare.username') || 'JamesMaster';
+      let micEnabled = false;
+      let screenEnabled = false;
+      let connecting = false;
+      username = username.trim().slice(0, 24) || 'Usuário';
 
-      function waitForIceGathering(peer) {
-        if (peer.iceGatheringState === 'complete') return Promise.resolve();
-        return new Promise(resolve => {
-          const checkState = () => {
-            if (peer.iceGatheringState === 'complete') {
-              peer.removeEventListener('icegatheringstatechange', checkState);
-              resolve();
-            }
-          };
-          peer.addEventListener('icegatheringstatechange', checkState);
-          checkState();
-        });
-      }
-
-      async function closeWebRtcTest() {
-        if (senderPeer) {
-          senderPeer.close();
-          senderPeer = null;
-        }
-        if (receiverPeer) {
-          receiverPeer.close();
-          receiverPeer = null;
-        }
-      }
       const title = document.getElementById('active-channel-title');
       const subtitle = document.getElementById('channel-subtitle');
       const headerIcon = document.getElementById('header-icon');
@@ -187,17 +198,84 @@
       const userList = document.getElementById('user-list');
       const chatMessages = document.getElementById('chat-messages');
       const chatInput = document.getElementById('chat-input');
-      let selectedVoice = null;
-      let connectedVoice = null;
-      let currentText = 'geral';
-      let username = localStorage.getItem('masterShare.username') || 'JamesMaster';
-      username = username.trim().slice(0, 24) || 'Usuário';
 
-      function showTextChannel(name) {
-        currentText = name;
-        selectedVoice = null;
-        connectedVoice = null;
-        render();
+      function showModal() {
+        urlInput.value = localStorage.getItem('masterShare.livekitUrl') || '';
+        tokenInput.value = '';
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        tokenInput.focus();
+      }
+      function hideModal() {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+      document.getElementById('close-livekit-modal').addEventListener('click', hideModal);
+      document.getElementById('cancel-livekit').addEventListener('click', hideModal);
+
+      function setStatus(label, good) {
+        status.textContent = label;
+        status.className = 'text-xs font-bold ' + (good ? 'text-emerald-400' : 'text-amber-300');
+        indicator.className = 'w-2 h-2 rounded-full ' + (good ? 'bg-emerald-500' : 'bg-amber-400');
+      }
+
+      function participantLabel(participant) {
+        return participant.name || participant.identity || 'Participante';
+      }
+
+      function renderParticipants() {
+        userList.replaceChildren();
+        if (!room || !connectedVoice) return;
+        const participants = [room.localParticipant, ...room.remoteParticipants.values()];
+        participants.forEach(participant => {
+          const row = document.createElement('div');
+          row.className = 'flex items-center space-x-2.5 py-1.5';
+          const dot = document.createElement('span');
+          dot.className = 'w-2 h-2 rounded-full ' + (participant.isSpeaking ? 'bg-emerald-400 animate-pulse' : 'bg-gray-500');
+          const name = document.createElement('span');
+          name.className = 'text-sm text-gray-200 font-medium truncate';
+          name.textContent = participantLabel(participant);
+          const you = document.createElement('span');
+          you.className = 'text-[10px] text-gray-500';
+          you.textContent = participant === room.localParticipant ? 'Você' : '';
+          row.append(dot, name, you);
+          userList.appendChild(row);
+        });
+        const count = room.remoteParticipants.size + 1;
+        voiceButtons.forEach(button => {
+          if (button.dataset.voiceChannel === connectedVoice) {
+            button.querySelector('span:last-child').textContent = count + ' / 5';
+          }
+        });
+      }
+
+      function addRemoteTrack(track, participant) {
+        const element = track.attach();
+        if (track.kind === LivekitClient.Track.Kind.Audio) {
+          element.autoplay = true;
+          element.style.display = 'none';
+          document.body.appendChild(element);
+          return;
+        }
+        const card = document.createElement('div');
+        card.className = 'relative min-h-0 rounded-xl overflow-hidden border border-gray-700 bg-black';
+        card.dataset.trackSid = track.sid;
+        element.className = 'w-full max-h-[42vh] object-contain';
+        element.autoplay = true;
+        element.playsInline = true;
+        const label = document.createElement('div');
+        label.className = 'absolute left-2 bottom-2 rounded-md bg-black/70 px-2 py-1 text-xs text-white';
+        label.textContent = participantLabel(participant) + ' • ' +
+          (track.source === LivekitClient.Track.Source.ScreenShare ? 'Tela' : 'Vídeo');
+        card.append(element, label);
+        remoteMedia.appendChild(card);
+        voicePlaceholder.classList.add('hidden');
+      }
+
+      function removeRemoteTrack(track) {
+        track.detach().forEach(element => element.remove());
+        remoteMedia.querySelectorAll('[data-track-sid="' + track.sid + '"]').forEach(card => card.remove());
+        if (!remoteMedia.children.length && !screenEnabled) voicePlaceholder.classList.remove('hidden');
       }
 
       function render() {
@@ -212,20 +290,19 @@
           const active = button.dataset.voiceChannel === selectedVoice;
           button.className = 'voice-channel w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm text-left transition ' +
             (active ? 'bg-accentBlue text-white' : 'text-gray-400 hover:bg-white/[0.04] hover:text-gray-200');
-          button.querySelector('span:last-child').textContent = button.dataset.voiceChannel === connectedVoice ? '1 / 5' : '0 / 5';
+          if (button.dataset.voiceChannel !== connectedVoice) button.querySelector('span:last-child').textContent = '0 / 5';
         });
-
         chatView.classList.toggle('hidden', !onText);
         voiceView.classList.toggle('hidden', !inVoice);
         voiceView.classList.toggle('flex', inVoice);
         voiceControls.classList.toggle('hidden', !inVoice);
         voiceControls.classList.toggle('flex', inVoice);
         joinButton.classList.toggle('hidden', !selectedVoice || inVoice);
-        joinButton.textContent = selectedVoice ? 'Entrar na voz: ' + selectedVoice : 'Conectar ao canal';
+        joinButton.textContent = selectedVoice ? 'Conectar à sala ' + selectedVoice : 'Conectar ao canal';
 
         if (onText) {
           title.textContent = currentText;
-          subtitle.textContent = selectedVoice ? 'Canal de texto • voz selecionada: ' + selectedVoice : 'Canal de texto';
+          subtitle.textContent = 'Canal de texto';
           headerIcon.className = 'fa-solid fa-hashtag text-gray-400';
           status.textContent = 'Canal de texto';
           status.className = 'text-xs font-bold text-emerald-400';
@@ -235,151 +312,196 @@
           chatInput.placeholder = 'Conversar em #' + currentText;
         } else {
           title.textContent = selectedVoice;
-          subtitle.textContent = inVoice ? 'Conectado neste dispositivo' : 'Canal de voz • não conectado';
+          subtitle.textContent = 'Conectado ao LiveKit';
           headerIcon.className = 'fa-solid fa-volume-high text-gray-400';
-          status.textContent = inVoice ? 'Conectado localmente' : 'Não conectado';
-          status.className = 'text-xs font-bold ' + (inVoice ? 'text-emerald-400' : 'text-gray-400');
-          indicator.className = 'w-2 h-2 rounded-full ' + (inVoice ? 'bg-emerald-500' : 'bg-gray-500');
           statusChannel.textContent = selectedVoice + ' • Game Confidencial';
-          usersSection.classList.toggle('hidden', !inVoice);
-          userList.replaceChildren();
-          if (inVoice) {
-            const userRow = document.createElement('div');
-            userRow.className = 'flex items-center space-x-2.5 py-1.5';
-            const dot = document.createElement('span');
-            dot.className = 'w-2 h-2 rounded-full bg-emerald-500';
-            const userName = document.createElement('span');
-            userName.className = 'text-sm text-gray-200 font-medium';
-            userName.textContent = username;
-            const you = document.createElement('span');
-            you.className = 'text-[10px] text-gray-500';
-            you.textContent = 'Você';
-            userRow.append(dot, userName, you);
-            userList.appendChild(userRow);
-          }
-          document.getElementById('voice-stage-title').textContent = 'Você está no canal ' + selectedVoice;
-          document.getElementById('voice-stage-description').textContent = 'Conectado localmente neste teste. A conexão de voz entre computadores será implementada depois.';
+          usersSection.classList.remove('hidden');
+          renderParticipants();
+          chatInput.placeholder = 'Conversar em #' + currentText;
+          document.getElementById('voice-stage-title').textContent = 'Você está na sala ' + selectedVoice;
+          document.getElementById('voice-stage-description').textContent = 'Conectado ao servidor LiveKit. Convide outra pessoa usando um token para esta mesma sala.';
         }
       }
+
+      async function connectToLiveKit() {
+        if (connecting) return;
+        const serverUrl = urlInput.value.trim();
+        const token = tokenInput.value.trim();
+        if (!/^wss?:\/\//i.test(serverUrl)) {
+          alert('Informe um endereço válido começando com wss:// ou ws://.');
+          return;
+        }
+        if (!token) {
+          alert('Cole o token de acesso gerado para esta sala.');
+          return;
+        }
+        if (!window.LivekitClient?.Room) {
+          alert('A biblioteca LiveKit não carregou. Verifique sua conexão com a internet e tente novamente.');
+          return;
+        }
+        connecting = true;
+        connectButton.disabled = true;
+        connectButton.textContent = 'Conectando...';
+        try {
+          localStorage.setItem('masterShare.livekitUrl', serverUrl);
+          room = new LivekitClient.Room({ adaptiveStream: true, dynacast: true });
+          room
+            .on(LivekitClient.RoomEvent.ParticipantConnected, renderParticipants)
+            .on(LivekitClient.RoomEvent.ParticipantDisconnected, renderParticipants)
+            .on(LivekitClient.RoomEvent.TrackSubscribed, (track, publication, participant) => {
+              addRemoteTrack(track, participant);
+              renderParticipants();
+            })
+            .on(LivekitClient.RoomEvent.TrackUnsubscribed, (track) => {
+              removeRemoteTrack(track);
+              renderParticipants();
+            })
+            .on(LivekitClient.RoomEvent.ActiveSpeakersChanged, renderParticipants)
+            .on(LivekitClient.RoomEvent.Disconnected, () => {
+              setStatus('Desconectado', false);
+            });
+          await room.connect(serverUrl, token);
+          connectedVoice = selectedVoice;
+          micEnabled = false;
+          screenEnabled = false;
+          tokenInput.value = '';
+          hideModal();
+          setStatus('Conectado', true);
+          render();
+        } catch (error) {
+          if (room) {
+            try { await room.disconnect(); } catch {}
+            room = null;
+          }
+          alert('Não foi possível conectar ao LiveKit. Confira o endereço, o token e a permissão da sala.\n\n' + error.message);
+        } finally {
+          connecting = false;
+          connectButton.disabled = false;
+          connectButton.textContent = 'Conectar';
+        }
+      }
+      connectButton.addEventListener('click', connectToLiveKit);
+      tokenInput.addEventListener('keydown', event => {
+        if (event.ctrlKey && event.key === 'Enter') connectToLiveKit();
+      });
 
       document.getElementById('edit-username').addEventListener('click', () => {
         const enteredName = window.prompt('Como você quer aparecer no MASTER SHARE?', username);
         if (enteredName === null) return;
-        const cleanName = enteredName.trim().replace(/\\s+/g, ' ').slice(0, 24);
-        if (!cleanName) {
-          alert('Digite um nome válido para continuar.');
-          return;
-        }
+        const cleanName = enteredName.trim().replace(/\s+/g, ' ').slice(0, 24);
+        if (!cleanName) { alert('Digite um nome válido para continuar.'); return; }
         username = cleanName;
         localStorage.setItem('masterShare.username', username);
         render();
       });
 
-      textButtons.forEach(button => button.addEventListener('click', () => showTextChannel(button.dataset.textChannel)));
+      textButtons.forEach(button => button.addEventListener('click', async () => {
+        if (room) await leaveRoom();
+        currentText = button.dataset.textChannel;
+        selectedVoice = null;
+        connectedVoice = null;
+        render();
+      }));
       voiceButtons.forEach(button => button.addEventListener('click', () => {
-        const channel = button.dataset.voiceChannel;
-        selectedVoice = channel;
-        connectedVoice = channel;
+        selectedVoice = button.dataset.voiceChannel;
         render();
       }));
       joinButton.addEventListener('click', () => {
         if (!selectedVoice) return;
-        connectedVoice = selectedVoice;
-        render();
+        showModal();
       });
-      async function stopScreenShare() {
-        await closeWebRtcTest();
-        if (screenStream) {
-          screenStream.getTracks().forEach(track => track.stop());
-          screenStream = null;
+
+      async function toggleMicrophone() {
+        if (!room) return;
+        try {
+          micEnabled = !micEnabled;
+          await room.localParticipant.setMicrophoneEnabled(micEnabled);
+          micButton.innerHTML = micEnabled
+            ? '<i class="fa-solid fa-microphone text-sm"></i>'
+            : '<i class="fa-solid fa-microphone-slash text-sm"></i>';
+          micButton.className = 'w-11 h-11 rounded-xl ' + (micEnabled ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-gray-800/80 hover:bg-blue-600') + ' text-white flex items-center justify-center transition';
+          micButton.title = micEnabled ? 'Desativar microfone' : 'Ativar microfone';
+        } catch (error) {
+          micEnabled = false;
+          alert('Não foi possível acessar o microfone: ' + error.message);
         }
+      }
+      micButton.addEventListener('click', toggleMicrophone);
+
+      async function toggleScreenShare() {
+        if (!room) return;
+        try {
+          screenEnabled = !screenEnabled;
+          await room.localParticipant.setScreenShareEnabled(screenEnabled);
+          startShareButton.innerHTML = screenEnabled
+            ? '<i class="fa-solid fa-stop text-sm"></i>'
+            : '<i class="fa-solid fa-desktop text-sm"></i>';
+          startShareButton.className = 'w-11 h-11 rounded-xl ' + (screenEnabled ? 'bg-red-600 hover:bg-red-500' : 'bg-gray-800/80 hover:bg-blue-600') + ' text-white flex items-center justify-center transition';
+          startShareButton.title = screenEnabled ? 'Parar compartilhamento de tela' : 'Compartilhar tela';
+          shareStage.classList.toggle('hidden', !screenEnabled);
+          shareStage.classList.toggle('flex', screenEnabled);
+          if (screenEnabled) {
+            voicePlaceholder.classList.add('hidden');
+            const publication = [...room.localParticipant.videoTrackPublications.values()]
+              .find(item => item.source === LivekitClient.Track.Source.ScreenShare);
+            if (publication?.track) {
+              shareVideo.srcObject = null;
+              const localElement = publication.track.attach();
+              localElement.className = 'w-full flex-1 min-h-0 object-contain rounded-xl bg-black border border-gray-800';
+              localElement.autoplay = true;
+              localElement.playsInline = true;
+              shareVideo.replaceWith(localElement);
+              localElement.id = 'screen-share-video';
+            }
+            document.getElementById('screen-share-info').textContent = 'Sua tela está sendo transmitida pela sala LiveKit.';
+          } else {
+            const currentVideo = document.getElementById('screen-share-video');
+            if (currentVideo && currentVideo !== shareVideo) currentVideo.replaceWith(shareVideo);
+            shareVideo.srcObject = null;
+            if (!remoteMedia.children.length) voicePlaceholder.classList.remove('hidden');
+            await room.localParticipant.setScreenShareEnabled(false);
+            document.getElementById('screen-share-info').textContent = 'Compartilhamento encerrado.';
+          }
+        } catch (error) {
+          screenEnabled = false;
+          startShareButton.innerHTML = '<i class="fa-solid fa-desktop text-sm"></i>';
+          shareStage.classList.add('hidden');
+          shareStage.classList.remove('flex');
+          alert('Não foi possível compartilhar a tela: ' + error.message);
+        }
+      }
+      startShareButton.addEventListener('click', toggleScreenShare);
+
+      async function leaveRoom() {
+        if (room) {
+          try {
+            if (micEnabled) await room.localParticipant.setMicrophoneEnabled(false);
+            if (screenEnabled) await room.localParticipant.setScreenShareEnabled(false);
+            await room.disconnect();
+          } catch (error) {
+            console.warn('Erro ao sair da sala:', error);
+          }
+        }
+        room = null;
+        micEnabled = false;
+        screenEnabled = false;
+        connectedVoice = null;
+        remoteMedia.replaceChildren();
+        const currentVideo = document.getElementById('screen-share-video');
+        if (currentVideo && currentVideo !== shareVideo) currentVideo.replaceWith(shareVideo);
         shareVideo.srcObject = null;
         shareStage.classList.add('hidden');
         shareStage.classList.remove('flex');
         voicePlaceholder.classList.remove('hidden');
-        document.getElementById('screen-share-info').textContent =
-          'Pré-visualização local • ainda não está sendo enviada aos outros participantes';
         startShareButton.innerHTML = '<i class="fa-solid fa-desktop text-sm"></i>';
         startShareButton.className = 'w-11 h-11 rounded-xl bg-gray-800/80 hover:bg-blue-600 text-gray-200 hover:text-white flex items-center justify-center transition';
         startShareButton.title = 'Compartilhar tela';
+        micButton.innerHTML = '<i class="fa-solid fa-microphone-slash text-sm"></i>';
+        micButton.className = 'w-11 h-11 rounded-xl bg-gray-800/80 hover:bg-blue-600 text-gray-200 flex items-center justify-center transition';
+        micButton.title = 'Ativar microfone';
       }
-
-      async function startScreenShare() {
-        if (!connectedVoice || !navigator.mediaDevices?.getDisplayMedia) {
-          alert('O compartilhamento de tela não está disponível neste ambiente.');
-          return;
-        }
-        try {
-          const stream = await navigator.mediaDevices.getDisplayMedia({
-            video: { frameRate: { ideal: 30, max: 60 } },
-            audio: false
-          });
-          screenStream = stream;
-
-          const capabilities = RTCRtpSender.getCapabilities?.('video');
-          const h264Codecs = capabilities?.codecs?.filter(codec =>
-            codec.mimeType.toLowerCase() === 'video/h264'
-          ) || [];
-          if (!h264Codecs.length) {
-            throw new Error('Este WebView2 não disponibilizou o codificador H.264 para WebRTC.');
-          }
-
-          senderPeer = new RTCPeerConnection({ iceServers: [] });
-          receiverPeer = new RTCPeerConnection({ iceServers: [] });
-
-          receiverPeer.ontrack = async event => {
-            const receivedStream = event.streams?.[0] || new MediaStream([event.track]);
-            shareVideo.srcObject = receivedStream;
-            try { await shareVideo.play(); } catch { /* A reprodução pode aguardar a interação do usuário. */ }
-          };
-
-          const videoTrack = stream.getVideoTracks()[0];
-          if (!videoTrack) throw new Error('A captura não retornou uma faixa de vídeo.');
-
-          const sender = senderPeer.addTrack(videoTrack, stream);
-          const videoTransceiver = senderPeer.getTransceivers().find(item => item.sender === sender);
-          if (videoTransceiver?.setCodecPreferences) {
-            videoTransceiver.setCodecPreferences(h264Codecs);
-          } else {
-            throw new Error('Este WebView2 não permite definir a preferência de codec H.264.');
-          }
-
-          const offer = await senderPeer.createOffer();
-          await senderPeer.setLocalDescription(offer);
-          await waitForIceGathering(senderPeer);
-          await receiverPeer.setRemoteDescription(senderPeer.localDescription);
-
-          const answer = await receiverPeer.createAnswer();
-          await receiverPeer.setLocalDescription(answer);
-          await waitForIceGathering(receiverPeer);
-          await senderPeer.setRemoteDescription(receiverPeer.localDescription);
-
-          voicePlaceholder.classList.add('hidden');
-          shareStage.classList.remove('hidden');
-          shareStage.classList.add('flex');
-          document.getElementById('screen-share-info').textContent =
-            'Teste WebRTC local • codec H.264 preferencial • ainda sem transmissão pela internet';
-          startShareButton.innerHTML = '<i class="fa-solid fa-stop text-sm"></i>';
-          startShareButton.className = 'w-11 h-11 rounded-xl bg-red-600 hover:bg-red-500 text-white flex items-center justify-center transition';
-          startShareButton.title = 'Parar compartilhamento de tela';
-
-          videoTrack.addEventListener('ended', stopScreenShare, { once: true });
-        } catch (error) {
-          await stopScreenShare();
-          if (error.name !== 'NotAllowedError') {
-            alert('Não foi possível iniciar o teste WebRTC com H.264: ' + error.message);
-          }
-        }
-      }
-
-      startShareButton.addEventListener('click', () => {
-        if (screenStream) stopScreenShare();
-        else startScreenShare();
-      });
-
       leaveButton.addEventListener('click', async () => {
-        await stopScreenShare();
-        connectedVoice = null;
+        await leaveRoom();
         selectedVoice = null;
         currentText = 'geral';
         render();
@@ -393,7 +515,7 @@
         row.className = 'flex items-start gap-3';
         const avatar = document.createElement('div');
         avatar.className = 'w-9 h-9 shrink-0 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-xs font-bold';
-        avatar.textContent = 'J';
+        avatar.textContent = username.charAt(0).toUpperCase();
         const body = document.createElement('div');
         body.className = 'min-w-0';
         const meta = document.createElement('div');
@@ -416,9 +538,6 @@
       });
 
       window.masterShare = { send };
-      window.addEventListener('message', event => {
-        if (event.data && event.data.type === 'master-share-host') document.documentElement.dataset.hostReady = 'true';
-      });
       render();
     })();
   </script>
