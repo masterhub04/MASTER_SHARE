@@ -1,49 +1,76 @@
+using System;
+using System.IO;
 using System.Windows;
-using MasterShare.Models;
+using Microsoft.Web.WebView2.Core;
 
 namespace MasterShare;
 
 public partial class MainWindow : Window
 {
+    private bool _isMaximized;
+
     public MainWindow()
     {
         InitializeComponent();
-        TopBar.Attach(this);
-        ServerSidebar.RoomSelected += OnRoomSelected;
-        CallControls.MicrophoneChanged += (_, enabled) =>
-            ServerSidebar.SetLocalMicrophoneState(enabled);
-        CallControls.ShareRequested += (_, _) =>
-            MessageBox.Show("O módulo de captura e transmissão será conectado na próxima etapa.", "MASTER SHARE",
-                MessageBoxButton.OK, MessageBoxImage.Information);
-        CallControls.LeaveRequested += (_, _) =>
-            MessageBox.Show("Você ainda não está conectado a uma sala remota.", "MASTER SHARE",
-                MessageBoxButton.OK, MessageBoxImage.Information);
-        CallControls.SettingsRequested += (_, _) =>
-            MessageBox.Show("As configurações de transmissão serão adicionadas na próxima etapa.", "MASTER SHARE",
-                MessageBoxButton.OK, MessageBoxImage.Information);
-        StreamingArea.FullscreenRequested += (_, _) => ToggleFullscreen();
+        Loaded += MainWindow_Loaded;
     }
 
-    private void OnRoomSelected(object? sender, RoomInfo room)
+    private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
-        RoomTitle.Text = room.Name;
-        ViewerCount.Text = $"  •  {room.MemberCount} participantes";
-        StreamingArea.SetRoom(room);
-    }
-
-    private void ToggleFullscreen()
-    {
-        if (WindowStyle == WindowStyle.None && ResizeMode == ResizeMode.NoResize && WindowState == WindowState.Maximized)
+        try
         {
-            WindowState = WindowState.Normal;
-            ResizeMode = ResizeMode.CanResize;
-            TopBar.Visibility = Visibility.Visible;
+            await Browser.EnsureCoreWebView2Async();
+            Browser.CoreWebView2.Settings.AreDefaultContextMenusEnabled = false;
+            Browser.CoreWebView2.Settings.IsStatusBarEnabled = false;
+            Browser.CoreWebView2.WebMessageReceived += Browser_WebMessageReceived;
+
+            var htmlPath = Path.Combine(AppContext.BaseDirectory, "HTML", "index.html");
+            if (!File.Exists(htmlPath))
+            {
+                MessageBox.Show($"Não encontrei a interface do MASTER SHARE em:\n{htmlPath}",
+                    "MASTER SHARE", MessageBoxButton.OK, MessageBoxImage.Error);
+                Close();
+                return;
+            }
+
+            Browser.CoreWebView2.Navigate(new Uri(htmlPath).AbsoluteUri);
         }
-        else
+        catch (Exception ex)
         {
-            TopBar.Visibility = Visibility.Collapsed;
-            ResizeMode = ResizeMode.NoResize;
-            WindowState = WindowState.Maximized;
+            MessageBox.Show("Não foi possível iniciar o WebView2.\n\n" + ex.Message,
+                "MASTER SHARE", MessageBoxButton.OK, MessageBoxImage.Error);
+            Close();
+        }
+    }
+
+    private void Browser_WebMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
+    {
+        try
+        {
+            using var json = System.Text.Json.JsonDocument.Parse(e.WebMessageAsJson);
+            var root = json.RootElement;
+            if (!root.TryGetProperty("action", out var action) || action.GetString() != "window")
+                return;
+            if (!root.TryGetProperty("command", out var command))
+                return;
+
+            switch (command.GetString())
+            {
+                case "minimize":
+                    WindowState = WindowState.Minimized;
+                    break;
+                case "maximize":
+                    _isMaximized = !_isMaximized;
+                    WindowState = _isMaximized ? WindowState.Maximized : WindowState.Normal;
+                    break;
+                case "close":
+                    Close();
+                    break;
+            }
+        }
+        catch
+        {
+            // Mensagens inválidas da interface são ignoradas.
         }
     }
 }
