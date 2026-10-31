@@ -11,7 +11,7 @@
     }}};
   </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.23.0/dist/livekit-client.umd.min.js"></script>
   <style>
     .hide-scrollbar { scrollbar-width:none; -ms-overflow-style:none; }
     .hide-scrollbar::-webkit-scrollbar { display:none; width:0; height:0; }
@@ -402,8 +402,10 @@
         connectedVoice = null;
         render();
       }));
-      voiceButtons.forEach(button => button.addEventListener('click', () => {
-        selectedVoice = button.dataset.voiceChannel;
+      voiceButtons.forEach(button => button.addEventListener('click', async () => {
+        const nextChannel = button.dataset.voiceChannel;
+        if (room && connectedVoice !== nextChannel) await leaveRoom();
+        selectedVoice = nextChannel;
         render();
       }));
       joinButton.addEventListener('click', () => {
