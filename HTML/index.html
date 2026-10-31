@@ -112,7 +112,7 @@
           <div id="screen-share-stage" class="hidden w-full h-full min-h-0 flex-col items-center justify-center gap-3 py-3">
             <div class="w-full flex items-center justify-between px-2">
               <div class="flex items-center gap-2 text-sm font-semibold text-gray-200"><span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> Sua tela está sendo compartilhada</div>
-              <button id="stop-screen-share" type="button" class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs font-semibold transition"><i class="fa-solid fa-stop mr-1"></i> Parar transmissão</button>
+
             </div>
             <video id="screen-share-video" autoplay playsinline muted class="w-full flex-1 min-h-0 object-contain rounded-xl bg-black border border-gray-800"></video>
             <p id="screen-share-info" class="text-[11px] text-gray-500">Pré-visualização local • ainda não está sendo enviada aos outros participantes</p>
@@ -145,7 +145,6 @@
       const joinButton = document.getElementById('join-channel');
       const leaveButton = document.getElementById('leave-channel');
       const startShareButton = document.getElementById('start-screen-share');
-      const stopShareButton = document.getElementById('stop-screen-share');
       const shareStage = document.getElementById('screen-share-stage');
       const shareVideo = document.getElementById('screen-share-video');
       const voicePlaceholder = document.getElementById('voice-placeholder');
@@ -240,7 +239,9 @@
         shareStage.classList.add('hidden');
         shareStage.classList.remove('flex');
         voicePlaceholder.classList.remove('hidden');
-        startShareButton.classList.remove('hidden');
+        startShareButton.innerHTML = '<i class="fa-solid fa-desktop text-sm"></i>';
+        startShareButton.className = 'w-11 h-11 rounded-xl bg-gray-800/80 hover:bg-blue-600 text-gray-200 hover:text-white flex items-center justify-center transition';
+        startShareButton.title = 'Compartilhar tela';
       }
 
       async function startScreenShare() {
@@ -258,7 +259,9 @@
           voicePlaceholder.classList.add('hidden');
           shareStage.classList.remove('hidden');
           shareStage.classList.add('flex');
-          startShareButton.classList.add('hidden');
+          startShareButton.innerHTML = '<i class="fa-solid fa-stop text-sm"></i>';
+          startShareButton.className = 'w-11 h-11 rounded-xl bg-red-600 hover:bg-red-500 text-white flex items-center justify-center transition';
+          startShareButton.title = 'Parar compartilhamento de tela';
           const [videoTrack] = stream.getVideoTracks();
           if (videoTrack) videoTrack.addEventListener('ended', stopScreenShare, { once: true });
         } catch (error) {
@@ -268,8 +271,10 @@
         }
       }
 
-      startShareButton.addEventListener('click', startScreenShare);
-      stopShareButton.addEventListener('click', stopScreenShare);
+      startShareButton.addEventListener('click', () => {
+        if (screenStream) stopScreenShare();
+        else startScreenShare();
+      });
 
       leaveButton.addEventListener('click', async () => {
         await stopScreenShare();
