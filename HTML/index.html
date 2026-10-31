@@ -149,6 +149,33 @@
       const shareVideo = document.getElementById('screen-share-video');
       const voicePlaceholder = document.getElementById('voice-placeholder');
       let screenStream = null;
+      let senderPeer = null;
+      let receiverPeer = null;
+
+      function waitForIceGathering(peer) {
+        if (peer.iceGatheringState === 'complete') return Promise.resolve();
+        return new Promise(resolve => {
+          const checkState = () => {
+            if (peer.iceGatheringState === 'complete') {
+              peer.removeEventListener('icegatheringstatechange', checkState);
+              resolve();
+            }
+          };
+          peer.addEventListener('icegatheringstatechange', checkState);
+          checkState();
+        });
+      }
+
+      async function closeWebRtcTest() {
+        if (senderPeer) {
+          senderPeer.close();
+          senderPeer = null;
+        }
+        if (receiverPeer) {
+          receiverPeer.close();
+          receiverPeer = null;
+        }
+      }
       const title = document.getElementById('active-channel-title');
       const subtitle = document.getElementById('channel-subtitle');
       const headerIcon = document.getElementById('header-icon');
@@ -231,6 +258,7 @@
         render();
       });
       async function stopScreenShare() {
+        await closeWebRtcTest();
         if (screenStream) {
           screenStream.getTracks().forEach(track => track.stop());
           screenStream = null;
@@ -239,6 +267,8 @@
         shareStage.classList.add('hidden');
         shareStage.classList.remove('flex');
         voicePlaceholder.classList.remove('hidden');
+        document.getElementById('screen-share-info').textContent =
+          'Pré-visualização local • ainda não está sendo enviada aos outros participantes';
         startShareButton.innerHTML = '<i class="fa-solid fa-desktop text-sm"></i>';
         startShareButton.className = 'w-11 h-11 rounded-xl bg-gray-800/80 hover:bg-blue-600 text-gray-200 hover:text-white flex items-center justify-center transition';
         startShareButton.title = 'Compartilhar tela';
@@ -255,18 +285,60 @@
             audio: false
           });
           screenStream = stream;
-          shareVideo.srcObject = stream;
+
+          const capabilities = RTCRtpSender.getCapabilities?.('video');
+          const h264Codecs = capabilities?.codecs?.filter(codec =>
+            codec.mimeType.toLowerCase() === 'video/h264'
+          ) || [];
+          if (!h264Codecs.length) {
+            throw new Error('Este WebView2 não disponibilizou o codificador H.264 para WebRTC.');
+          }
+
+          senderPeer = new RTCPeerConnection({ iceServers: [] });
+          receiverPeer = new RTCPeerConnection({ iceServers: [] });
+
+          receiverPeer.ontrack = async event => {
+            const receivedStream = event.streams?.[0] || new MediaStream([event.track]);
+            shareVideo.srcObject = receivedStream;
+            try { await shareVideo.play(); } catch { /* A reprodução pode aguardar a interação do usuário. */ }
+          };
+
+          const videoTrack = stream.getVideoTracks()[0];
+          if (!videoTrack) throw new Error('A captura não retornou uma faixa de vídeo.');
+
+          const sender = senderPeer.addTrack(videoTrack, stream);
+          const videoTransceiver = senderPeer.getTransceivers().find(item => item.sender === sender);
+          if (videoTransceiver?.setCodecPreferences) {
+            videoTransceiver.setCodecPreferences(h264Codecs);
+          } else {
+            throw new Error('Este WebView2 não permite definir a preferência de codec H.264.');
+          }
+
+          const offer = await senderPeer.createOffer();
+          await senderPeer.setLocalDescription(offer);
+          await waitForIceGathering(senderPeer);
+          await receiverPeer.setRemoteDescription(senderPeer.localDescription);
+
+          const answer = await receiverPeer.createAnswer();
+          await receiverPeer.setLocalDescription(answer);
+          await waitForIceGathering(receiverPeer);
+          await senderPeer.setRemoteDescription(receiverPeer.localDescription);
+
+          shareVideo.srcObject = null;
           voicePlaceholder.classList.add('hidden');
           shareStage.classList.remove('hidden');
           shareStage.classList.add('flex');
+          document.getElementById('screen-share-info').textContent =
+            'Teste WebRTC local • codec H.264 preferencial • ainda sem transmissão pela internet';
           startShareButton.innerHTML = '<i class="fa-solid fa-stop text-sm"></i>';
           startShareButton.className = 'w-11 h-11 rounded-xl bg-red-600 hover:bg-red-500 text-white flex items-center justify-center transition';
           startShareButton.title = 'Parar compartilhamento de tela';
-          const [videoTrack] = stream.getVideoTracks();
-          if (videoTrack) videoTrack.addEventListener('ended', stopScreenShare, { once: true });
+
+          videoTrack.addEventListener('ended', stopScreenShare, { once: true });
         } catch (error) {
+          await stopScreenShare();
           if (error.name !== 'NotAllowedError') {
-            alert('Não foi possível iniciar o compartilhamento de tela: ' + error.message);
+            alert('Não foi possível iniciar o teste WebRTC com H.264: ' + error.message);
           }
         }
       }
