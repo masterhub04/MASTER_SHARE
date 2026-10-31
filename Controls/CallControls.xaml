@@ -1,0 +1,12 @@
+<UserControl x:Class="MasterShare.Controls.CallControls"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ Background="#151820">
+ <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+  <Button x:Name="MicButton" Width="48" Height="44" Margin="5,0" Background="#252B36" Content="🎙" FontSize="17" Click="Mic_Click" ToolTip="Microfone"/>
+  <Button Width="48" Height="44" Margin="5,0" Background="#252B36" Content="▣" FontSize="17" Click="Share_Click" ToolTip="Compartilhar tela"/>
+  <Button Width="52" Height="44" Margin="5,0" Background="#C83D4B" Content="☎" FontSize="18" Click="Leave_Click" ToolTip="Sair da sala"/>
+  <Button Width="48" Height="44" Margin="5,0" Background="#252B36" Content="•••" FontSize="16" Click="Settings_Click" ToolTip="Mais opções"/>
+  <Button Width="48" Height="44" Margin="5,0" Background="#252B36" Content="⛶" FontSize="19" Click="Fullscreen_Click" ToolTip="Tela cheia"/>
+ </StackPanel>
+</UserControl>
