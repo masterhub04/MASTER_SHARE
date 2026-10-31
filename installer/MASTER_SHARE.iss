@@ -1,5 +1,5 @@
 #define MyAppName "MASTER SHARE"
-#define MyAppVersion "0.1.0"
+#define MyAppVersion "0.2.0"
 #define MyAppPublisher "Master InfoTec"
 #define MyAppExeName "MASTER SHARE.exe"
 #define PublishDir "..\\publish"
